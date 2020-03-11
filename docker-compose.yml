@@ -1,0 +1,28 @@
+version: '2.0'
+
+services:
+  db:
+    image: postgres
+  webservice:
+    build: .
+    command: bash -c "python3 manage.py makemigrations && python3 manage.py migrate && python3 manage.py runserver 0.0.0.0:8888"
+    container_name: Eric
+    volumes:
+      - .:/Eric
+    ports:
+      - "8888:8888"
+    depends_on:
+      - db
+
+  # frontend:
+  #   container_name: frontend
+  #   build: 
+  #     context: ./frontend
+  #     dockerfile: Dockerfile
+  #   volumes:
+  #     - '.:/usr/src/app'
+  #     - '/usr/src/app/node_modules'
+  #   ports:
+  #     - '3009:3009'
+  #   environment:
+  #     - NODE_ENV=development
