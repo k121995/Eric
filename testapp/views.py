@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import HttpResponse,HttpResponseRedirect
+from django.http import HttpResponse,HttpResponseRedirect,redirect
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import authenticate
 from django.contrib.auth import views as login
@@ -27,16 +27,16 @@ import numpy as np
 from .main import report, do_sklearn,do_tpot
 # WORK_DIR = '/home/user/eluellenml/project1/Files/'
 WORK_DIR = settings.MEDIA_ROOT
-def Home(request):
-    # hello = "hiiiiiii"
-    return render(request, 'registration/dashboard.html',)
+# def Home(request):
+#     # hello = "hiiiiiii"
+#     return render(request, 'registration/login.html',)
 
 
 
 def login_request(request):
     if request.method == "POST":
-        username = request.POST['username']
-        password = request.POST['password']
+        username = request.POST.get('username')
+        password = request.POST.get('password')
         user = User.objects.filter(username="username", password=password).exists()
         if user is not None:        	
         	return render(request,'registration/dashboard.html')
@@ -48,6 +48,7 @@ def login_request(request):
 
 
 ENROLLED_ONLY = True
+
 def load_ica_aid_opt(data_file_name):
 		data = []
 		target = []
@@ -195,11 +196,12 @@ def do_tpot(X,y):
 
 
 def upload_csv(request):
+	bhvasdbvv
 	db={}
 	# data=
 	t=''
 	s=''
-
+	
 	if request.method == "GET":
 		print("GET DATA")
 		return render(request,"registration/dashboard.html")
@@ -207,10 +209,12 @@ def upload_csv(request):
 		print("POST DATA")
 		q = request.POST['q']
 		csv_file=request.FILES['csv_file']
+		
 		if not csv_file.name.endswith('.csv'):
 			return HttpResponse("THIS IS NOT A CSV FILE")
 
-		user = User.objects.get(id=1)
+		user = request.user.id
+		print(user)
 		data = filedata.objects.create(user_id=user,filename=csv_file)
 		# print(data)
 		
