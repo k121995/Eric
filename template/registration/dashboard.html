@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title></title>
+    <style>
+    	body { margin: 0; }
+        .main-content { text-align: center; }
+        h1 { color: blue; background: grey; margin: 0; padding: 50px;}
+        h3 { color: blue; padding-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="main-content">
+        <h1>Welcome to dashboard</h1>
+        	<form method="POST" enctype="multipart/form-data" class="form-horizontal" style="text-align: center"> 
+	{% csrf_token %}
+	<div class="form-group" style="margin-top: 20px;">
+	    <label for="name" >File: </label>
+	    <input type="file" name="csv_file" id="csv_file" required="True" class="form-control">
+	    <!-- <label for="q" >Press T for Tpot or S for sklearn: </label> -->
+	    <label for="args">Choose Algo:</label>
+
+<select id="q" name="q">
+  <option value="T">Tpot</option>
+  <option value="S">sklearn</option>
+</select>
+	    
+	</div>
+	<br>
+	<div class="form-group">                    
+	        <button class="btn btn-primary"> <span style="margin-right:5px;">
+	        </span>Upload </button>
+	    </div> 
+	</form>
+        {% if db.result_set %}
+         <h3>R2Score result: = {{db.result_set}}</h3>
+         {% else %}
+         <h3>tpot result: = {{db}}</h3>
+        {% endif %}
+
+    </div>
+</body>
+</html>
