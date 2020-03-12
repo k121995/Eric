@@ -7,6 +7,8 @@ import logging
 from django.contrib import messages
 from django.urls import reverse
 from django.contrib.auth.models import User
+from .models import filedata
+from django.conf import settings
 # Create your views here.
 
 import argparse
@@ -23,7 +25,8 @@ import autosklearn.regression
 from tpot import TPOTRegressor
 import numpy as np
 from .main import report, do_sklearn,do_tpot
-WORK_DIR = '/home/user/eluellenml/files/'
+# WORK_DIR = '/home/user/eluellenml/project1/Files/'
+WORK_DIR = settings.MEDIA_ROOT
 def Home(request):
     # hello = "hiiiiiii"
     return render(request, 'registration/dashboard.html',)
@@ -50,6 +53,7 @@ def load_ica_aid_opt(data_file_name):
 		target = []
 
 		print(f"[INFO] Loading dataset from {data_file_name}.")
+
 		# pa ="/home/user/eluellenml/"
 		# re=pa+request.FILES['csv_file']
 		# csv_file = request.POST['csv_file']
@@ -157,7 +161,8 @@ def do_sklearn(X,y):
     automl.fit(X_train, y_train)
     print(f'[INFO] Elapsed time finding best model: {time.time() - start} seconds.')
 
-    report(X_test, y_test, automl, 'sklearn')
+    y=report(X_test, y_test, automl, 'sklearn')
+    return y  
 
 def do_tpot(X,y):
     X_train, X_test, y_train, y_test = \
@@ -165,9 +170,10 @@ def do_tpot(X,y):
 
     tpot = TPOTRegressor(generations=5, population_size=50, verbosity=2)
     tpot.fit(X_train, y_train)
-    print(tpot.score(X_test, y_test))
+    result=tpot.score(X_test, y_test)
+    print(result,"########")		#print(tpot.score(X_test, y_test))
     tpot.export(WORK_DIR + '/tpot_ica_pipeline.py')
-
+    return result
 # def main():
 #     # Setup our CLI to accept an argument to determine which
 #     # algorithm to run.
@@ -193,15 +199,23 @@ def upload_csv(request):
 	# data=
 	t=''
 	s=''
+
 	if request.method == "GET":
 		print("GET DATA")
-		return render(request,"registration/upload_csv.html")
+		return render(request,"registration/dashboard.html")
 	if request.method == "POST":
 		print("POST DATA")
-		s=request.FILES['csv_file']
+		q = request.POST['q']
+		csv_file=request.FILES['csv_file']
+		if not csv_file.name.endswith('.csv'):
+			return HttpResponse("THIS IS NOT A CSV FILE")
+
+		user = User.objects.get(id=1)
+		data = filedata.objects.create(user_id=user,filename=csv_file)
+		# print(data)
 		
-		
-		input_dataset = WORK_DIR + str(s)
+		input_dataset = WORK_DIR + '/'+str(csv_file)
+		print(input_dataset)
 		# print(input_dataset,":DAAATA GO")
 		# parser = argparse.ArgumentParser(
 		# 	description="Run sklearn or tpot on a dataset.")
@@ -212,14 +226,18 @@ def upload_csv(request):
 		# args = parser.parse_args()
 		# print(input_dataset,":DAAATA")
 		X, y = load_ica_aid_opt(input_dataset)
-
+		if q =='T':
+			db["value"]=do_tpot(X,y)
+		else:
+			db["value"]=do_sklearn(X,y)
 		# if args.run_tpot:
 		# 	do_tpot(X,y)
 		# else:
 		# data=do_sklearn(X,y)
-		db["value"]=do_sklearn(X,y)
+		# db["value"]=do_sklearn(X,y)
 		print(db)
-		return render(request,'registration/dashboard.html',{'db':db})
+
+		return render(request,'registration/dashboard.html',{'db':db['value']})
 
 
 
