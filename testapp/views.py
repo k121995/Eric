@@ -205,7 +205,7 @@ def upload_csv(request):
 		return render(request,"registration/dashboard.html")
 	if request.method == "POST":
 		print("POST DATA")
-		q = request.POST['q']
+		# q = request.POST['q']
 		csv_file=request.FILES['csv_file']
 		if not csv_file.name.endswith('.csv'):
 			return HttpResponse("THIS IS NOT A CSV FILE")
@@ -226,15 +226,15 @@ def upload_csv(request):
 		# args = parser.parse_args()
 		# print(input_dataset,":DAAATA")
 		X, y = load_ica_aid_opt(input_dataset)
-		if q =='T':
-			db["value"]=do_tpot(X,y)
-		else:
-			db["value"]=do_sklearn(X,y)
+		# if q =='T':
+		# 	db["value"]=do_tpot(X,y)
+		# else:
+		# 	db["value"]=do_sklearn(X,y)
 		# if args.run_tpot:
 		# 	do_tpot(X,y)
 		# else:
-		# data=do_sklearn(X,y)
-		# db["value"]=do_sklearn(X,y)
+		data=do_sklearn(X,y)
+		db["value"]=do_sklearn(X,y)
 		print(db)
 
 		return render(request,'registration/dashboard.html',{'db':db['value']})

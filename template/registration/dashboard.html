@@ -1,9 +1,4 @@
-  {% if messages %}
 
-  {% for message in messages %}
-     <li>{{ message }}</li>
-     {% endfor %}
-  {% endif %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -12,14 +7,36 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title></title>
+
     <style>
     	body { margin: 0; }
         .main-content { text-align: center; }
         h1 { color: blue; background: grey; margin: 0; padding: 50px;}
         h3 { color: blue; padding-top: 20px; }
+        .loader {
+            border: 16px solid #f3f3f3;
+            border-radius: 50%;
+            margin-left: 50%;
+            border-top: 12px solid #3498db;
+            margin-top: 30px;
+            width: 50px;
+            height: 50px;
+            -webkit-animation: spin 2s linear infinite; /* Safari */
+            animation: spin 2s linear infinite;
+
+}
+/*@-webkit-keyframes spin {
+  0% { -webkit-transform: rotate(0deg); }
+  100% { -webkit-transform: rotate(360deg); }
+}*/
     </style>
 </head>
 <body>
+  {% if messages %}
+  {% for message in messages %}
+     <li>{{ message }}</li>
+     {% endfor %}
+  {% endif %}
 
 
     <div class="main-content">
@@ -30,26 +47,66 @@
 	    <label for="name" >File: </label>
 	    <input type="file" name="csv_file" id="csv_file" required="True" class="form-control">
 	    <!-- <label for="q" >Press T for Tpot or S for sklearn: </label> -->
-	    <label for="args">Choose Algo:</label>
+	   <!--  <label for="args">Choose Algo:</label>
 
 <select id="q" name="q">
   <option value="T">Tpot</option>
   <option value="S">sklearn</option>
 </select>
-	    
+	     -->
 	</div>
 	<br>
 	<div class="form-group">                    
-	        <button class="btn btn-primary"> <span style="margin-right:5px;">
+	        <button id="upload_file" class="btn btn-primary"> <span style="margin-right:5px;">
 	        </span>Upload </button>
+
 	    </div> 
+     <!--  <div class="loader" style="display: none;"></div> -->
 	</form>
-        {% if db.result_set %}
+       <!--  {% if db.result_set %} -->
          <h3>R2Score result: = {{db.result_set}}</h3>
-         {% else %}
+         <!-- {% else %}
          <h3>tpot result: = {{db}}</h3>
-        {% endif %}
+        {% endif %} -->
 
     </div>
 </body>
 </html>
+<!-- <script type="text/javascript">
+
+$(document).ready(function(){
+  $("upload_file").click(call_csv_file(){
+  });
+});
+</script>
+
+
+<script type="text/javascript">
+    function call_csv_file()
+  {
+    // user_id = $("#action_shop_id").val();
+    // action = $("#action_tag").val();
+    $("#action_loaderdiv").show();
+    $.ajax({
+        type:"POST",
+        url:"upload/csv/",
+        data:{csrfmiddlewaretoken:'{{ csrf_token }}'},
+        success:function(response){
+            if(response.message==1){
+                    $("#action_loaderdiv").hide();
+                    cancel_action();
+                    window.location.reload();
+            }else{
+                cancel_action();
+                $("#action_loaderdiv").hide();
+            }
+            $("#action_loaderdiv").hide();
+            cancel_action();
+        },
+        error:function(xhr){
+            cancel_action();
+            $("#action_loaderdiv").hide();
+        }
+    })
+}
+</script> -->
