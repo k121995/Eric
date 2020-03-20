@@ -7,7 +7,7 @@ import logging
 from django.contrib import messages
 from django.urls import reverse
 from django.contrib.auth.models import User
-from .models import filedata
+from .models import filedata,CsvFile
 from django.conf import settings
 # Create your views here.
 
@@ -15,6 +15,7 @@ import argparse
 import time
 import csv
 import io
+import os,shutil
 
 from sklearn.model_selection import train_test_split
 import sklearn.datasets
@@ -48,26 +49,74 @@ def login_request(request):
 
 
 ENROLLED_ONLY = True
-def load_ica_aid_opt(data_file_name):
+def load_ica_aid_opt(data_file_name,*args, **kwargs):
 		data = []
 		target = []
 
 		print(f"[INFO] Loading dataset from {data_file_name}.")
 
-		# pa ="/home/user/eluellenml/"
-		# re=pa+request.FILES['csv_file']
-		# csv_file = request.POST['csv_file']
-		# csv_file = request.path
-		# print(csv_file, "jbdvhddddddddddddd")
-		# return render(request, "registration/upload_csv.html")
+		
 		with open(data_file_name) as f:
-			data_file = csv.reader(f)
-
-			# get the total lines in the CSV -1 for headers
-			samples = sum(1 for row in data_file)-1
+			reader_file = csv.reader(f)
+			# io_string = io.StringIO(reader)
+			# next(io_string)
+			# print(data_file,"################################################################################################################")
+			# for row in reader_file:
+			# 	# print(row,"################")
+			# 	# print(row[2],row[1],"hellllllllllllllllllllllllllllll")
+			# 	if row[1]!= "Total Tuition":
+			# 		# print(row[0],row[1])
+			# # 		# result = None
+			# # 		# try:
+			# 		obj,created = CsvFile.objects.update_or_create(Financial_Aid_System_Applicant_ID=row[0],
+			# 						Total_Tuition=row[1],
+			# 						Recommended_Award=row[2] ,	
+			# 						Rec_Award_Perc_Tuition = row[3],
+			# 						Children_in_Applicants_HH=row[4], 
+			# 						Est_Household_Contribution =row[5],	
+			# 						Total_Income =row[6]	 ,
+			# 						Total_Available_for_Tuition =row[7] ,	 
+			# 						Total_Assets =row[8] 	,
+			# 						Total_Liabilities =row[9] 	,
+			# 						Total_Net_Worth=row[10],
+			# 						P1_Alumni_Academy =row[11],
+			# 						P1_Alumni_Camp=row[12],
+			# 						P1_Alumni_Institute =row[13] ,	
+			# 						P1_Alumni_All_State =row[14] 		,
+			# 						P2_Alumni_Academy =row[15],
+			# 						P2_Alumni_Camp =row[16],
+			# 						P2_Alumni_All_Stat=row[17] ,
+			# 						P2_Alumni_Institute=row[18] 	,
+			# 						Sum_Alum =row[19] 	,
+			# 						Grade =row[20]	,
+			# 						Primary_Arts_Area =row[21] 	,
+			# 						Aid_Total_Need =row[22] 	,
+			# 						Aid_Merit =row[23]	,
+			# 						Aid_Inst_Grant =row[24] 	,
+			# 						Sex =row[25] 	,
+			# 						Behavior_Review=row[26] ,	
+			# 						Academic_Review=row[27],					
+			# 						Health_Review =row[28] ,	
+			# 						Learning_Specialist_Review=row[29],
+			# 						CAPS_Review =row[30],
+			# 						Sum_Review =row[31] ,
+			# 						Tuition_Default=row[32]	,
+			# 						Art_Rating=row[33] ,
+			# 						Accepted=row[34] ,
+			# 						Attended_Camp=row[35],
+			# 						Attended_Inst=row[36],
+			# 						Attended_Sum=row[37],
+			# 						Tuition_Remander=row[38],
+			# 						Total_FA=row[39],
+			# 						Percent_FA=row[40],
+			# 						Enrolled=row[41])
+			# 		print(obj,created)
+					
+					# get the total lines in the CSV -1 for headers
+			samples = sum(1 for row in reader_file)-1
 
 			f.seek(0)
-			temp = next(data_file)  # column headings/features
+			temp = next(reader_file)  # column headings/features
 			feature_names = np.array(temp)
 			# print(f"DEBUG: Feature names = {feature_names}")
 
@@ -77,15 +126,18 @@ def load_ica_aid_opt(data_file_name):
 			# We also don't want the Percent FA column
 				unwanted_columns = 3
 			# Subtract columns we don't want
-			features = len(feature_names) - unwanted_columns
+			features = len(feature_names) - unwanted_columns			
 			print(f"[INFO] Samples = {samples}, Features = {features}")
+			print(samples)
+			print(features)
 
 			# Initialize two empty arrays for the CSV data
 			data = np.empty((samples, features))
+			print(	"++++++++++++++")
 			target = np.empty((samples,))
 
 			index=0
-			for d in data_file:
+			for d in reader_file:
 				# print(f"DEBUG: {index} = {str(d)}")
 				enrolled = int(d[-1])
 
@@ -108,16 +160,10 @@ def load_ica_aid_opt(data_file_name):
 			d = data[:index]
 			t = target[:index]
 			return d,t
-			# report(d,t)
-			# print(d,t,"hello")
-			# print(f"Target column - {feature_names[-2]}")
-			# print(f"Data columns - {feature_names[1:-2]}")
-
-	# print(s,"FILENAME")
-	# return HttpResponse({"hh":d, "kk":t})
-	        # report(d,t)
+				
 def report(X_test, y_test, classifier, type='sklearn'):
 	r2={}
+	# r3={}
 	if type == 'sklearn':
 		predictions = classifier.predict(X_test)
 		# print("\n\n---- CLASSIFICATION REPORT ----")
@@ -127,6 +173,7 @@ def report(X_test, y_test, classifier, type='sklearn'):
 		print(explained_variance_score(y_test, predictions))
 
 		print("\n\n---- MODELS ----")
+		# r2['best_model']=classifier.show_models()
 		print(classifier.show_models())
 
 		print("\n\n---- STATISTICS ----")
@@ -141,28 +188,33 @@ def report(X_test, y_test, classifier, type='sklearn'):
 
 
 def do_sklearn(X,y):
+	# os.rmdir(WORK_DIR +'/'+'File/ica_tmp',ignore_errors=True)
 
-    print('[INFO] Splitting.')
+	print('[INFO] Splitting.')
 
-    X_train, X_test, y_train, y_test = \
-        train_test_split(X, y, random_state=1)
+	X_train, X_test, y_train, y_test = \
+		train_test_split(X, y, random_state=1)
 
-    print(f'[INFO] Train shape: {X_train.shape}')
-    print(f'[INFO] Test shape: {X_test.shape}')
+	print(f'[INFO] Train shape: {X_train.shape}')
+	print(f'[INFO] Test shape: {X_test.shape}')
 
-    print('[INFO] Finding best model...')
-    start = time.time()
-    automl = autosklearn.regression.AutoSklearnRegressor(
-        time_left_for_this_task=120,
-        per_run_time_limit=30,
-        tmp_folder= WORK_DIR +'/ica_tmp',
-        output_folder= WORK_DIR +'/ica_out',
-    )
-    automl.fit(X_train, y_train)
-    print(f'[INFO] Elapsed time finding best model: {time.time() - start} seconds.')
-
-    y=report(X_test, y_test, automl, 'sklearn')
-    return y  
+	print('[INFO] Finding best model...')
+	start = time.time()
+	# shutil.rmtree(WORK_DIR +'/'+'File/ica_tmp')
+	# shutil.rmtree(WORK_DIR +'/'+'File/ica_tmp')
+	# os.rmdir(WORK_DIR +'/'+'File/ica_out')
+	automl = autosklearn.regression.AutoSklearnRegressor(
+		time_left_for_this_task=120,
+		per_run_time_limit=30,
+		tmp_folder= WORK_DIR +'/'+'File/ica_tmp',
+		# output_folder= WORK_DIR +'/'+'File/ica_out',
+	)
+	automl.fit(X_train, y_train)
+	model_timing="[INFO] Elapsed time finding best model: "+str(time.time() - start)+"seconds."
+	print(f'[INFO] Elapsed time finding best model: {time.time() - start} seconds.')
+	print(model_timing)	
+	y['data']=report(X_test, y_test, automl, 'sklearn')
+	return y
 
 def do_tpot(X,y):
     X_train, X_test, y_train, y_test = \
@@ -192,7 +244,7 @@ def do_tpot(X,y):
 #     else:
 #         do_sklearn(X,y)
 
-
+# from django.http import JsonResponse
 
 def upload_csv(request):
 	db={}
@@ -206,14 +258,83 @@ def upload_csv(request):
 	if request.method == "POST":
 		print("POST DATA")
 		# q = request.POST['q']
-		csv_file=request.FILES['csv_file']
+		# os.rmdir(WORK_DIR +'/'+'File/ica_tmp')
+		csv_file=request.FILES['csvfile']
+		print(csv_file)
 		if not csv_file.name.endswith('.csv'):
 			return HttpResponse("THIS IS NOT A CSV FILE")
 
-		user = User.objects.get(id=1)
-		data = filedata.objects.create(user_id=user,filename=csv_file)
-		# print(data)
+		with open(WORK_DIR + '/'+str(csv_file)) as f:
+			data_set = csv.reader(f)
+		# data_set = csv_file.reader()
+			print(data_set)
+			for row in data_set:
+					# print(row,"################")
+					# print(row[2],row[1],"hellllllllllllllllllllllllllllll")
+					if row[1]!= "Total Tuition":
+						# print(row[0],row[1])
+				# 		# result = None
+				# 		# try:
+						obj,created = CsvFile.objects.update_or_create(Financial_Aid_System_Applicant_ID=row[0],
+										Total_Tuition=row[1],
+										Recommended_Award=row[2] ,	
+										Rec_Award_Perc_Tuition = row[3],
+										Children_in_Applicants_HH=row[4], 
+										Est_Household_Contribution =row[5],	
+										Total_Income =row[6]	 ,
+										Total_Available_for_Tuition =row[7] ,	 
+										Total_Assets =row[8] 	,
+										Total_Liabilities =row[9] 	,
+										Total_Net_Worth=row[10],
+										P1_Alumni_Academy =row[11],
+										P1_Alumni_Camp=row[12],
+										P1_Alumni_Institute =row[13] ,	
+										P1_Alumni_All_State =row[14] 		,
+										P2_Alumni_Academy =row[15],
+										P2_Alumni_Camp =row[16],
+										P2_Alumni_All_Stat=row[17] ,
+										P2_Alumni_Institute=row[18] 	,
+										Sum_Alum =row[19] 	,
+										Grade =row[20]	,
+										Primary_Arts_Area =row[21] 	,
+										Aid_Total_Need =row[22] 	,
+										Aid_Merit =row[23]	,
+										Aid_Inst_Grant =row[24] 	,
+										Sex =row[25] 	,
+										Behavior_Review=row[26] ,	
+										Academic_Review=row[27],					
+										Health_Review =row[28] ,	
+										Learning_Specialist_Review=row[29],
+										CAPS_Review =row[30],
+										Sum_Review =row[31] ,
+										Tuition_Default=row[32]	,
+										Art_Rating=row[33] ,
+										Accepted=row[34] ,
+										Attended_Camp=row[35],
+										Attended_Inst=row[36],
+										Attended_Sum=row[37],
+										Tuition_Remander=row[38],
+										Total_FA=row[39],
+										Percent_FA=row[40],
+										Enrolled=row[41])
+						print(obj,created,"ggggggggggggggggggggggggggggggg")	
 		
+		user_id = request.user.id
+		print(user_id,"NO")
+		userobj=User.objects.get(id=user_id)
+		data = filedata.objects.create(user_id=userobj,filename=csv_file)		
+		# input_dataset = WORK_DIR + '/'+str(csv_file)
+		
+		# print(input_dataset)
+		# print(input_dataset,":DAAATA GO")
+		# parser = argparse.ArgumentParser(
+		# 	description="Run sklearn or tpot on a dataset.")
+		# parser.add_argument('--tpot', action='store_true', dest='run_tpot',
+		# 	default=False, help="Run the TPOT regressor")
+		# parser.add_argument('--debug', action='store_true', dest='debug',
+		# 	default=False, help="Enable debugging.")
+		# args = parser.parse_args()
+		# print(input_dataset,":DAAATA")
 		input_dataset = WORK_DIR + '/'+str(csv_file)
 		print(input_dataset)
 		# print(input_dataset,":DAAATA GO")
@@ -233,15 +354,26 @@ def upload_csv(request):
 		# if args.run_tpot:
 		# 	do_tpot(X,y)
 		# else:
-		data=do_sklearn(X,y)
+		# data=do_sklearn(X,y)
 		db["value"]=do_sklearn(X,y)
 		print(db)
-
+		shutil.rmtree(WORK_DIR +'/'+'File/ica_tmp',ignore_errors=True)		
 		return render(request,'registration/dashboard.html',{'db':db['value']})
+		# return JsonResponse(db['value'])	
 
+		
 
+# def Ajax_view(request):
+# 	if request.method == 'GET':
+# 		print('getdataaaaa')
+# 	# if request.method == 'POST':	
+# 		return render(request,"registration/dashboard.html")
+# 	# if request.method == 'POST':	
+# 	# # 	filename = request.Files['csv_file']
+# 	# # 	print(filename)
+# 	# 	return render(request,'registration/dashboard.html',)
 
-
+# # return render(request,'registration/dashboard.html',{'db':db['value']})
 
 
 

@@ -112,8 +112,8 @@ def do_sklearn(X,y):
     automl = autosklearn.regression.AutoSklearnRegressor(
         time_left_for_this_task=120,
         per_run_time_limit=30,
-        tmp_folder= WORK_DIR +'/ica_tmp',
-        output_folder= WORK_DIR +'/ica_out',
+        tmp_folder= WORK_DIR +'/ica_tmp1',
+        output_folder= WORK_DIR +'/ica_out1',
     )
     automl.fit(X_train, y_train)
     print(f'[INFO] Elapsed time finding best model: {time.time() - start} seconds.')

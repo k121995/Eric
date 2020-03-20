@@ -1,0 +1,175 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title></title>
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+
+
+    <style>
+    	body { margin: 0; }
+        .main-content { text-align: center; }
+        h1 { color: blue; background: grey; margin: 0; padding: 50px;}
+        h3 { color: blue; padding-top: 20px; }
+    /*    .loader {
+            border: 16px solid #f3f3f3;
+            border-radius: 50%;
+            margin-left: 50%;
+            border-top: 12px solid #3498db;
+            margin-top: 30px;
+            width: 50px;
+            height: 50px;
+            -webkit-animation: spin 2s linear infinite;  Safari 
+            animation: spin 2s linear infinite;}
+        .ajaxProgress{
+          display: none;
+          text-align:center;
+          padding: 20px;
+          width: 300px;
+        }
+    @-webkit-keyframes spin {
+      0% { -webkit-transform: rotate(0deg); }
+      100% { -webkit-transform: rotate(360deg); }
+    }
+    .loader {
+    position: fixed;
+    left: 0px;
+    top: 0px;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    background: url('{{ MEDIA_URL }}static/images/ajax-loader.gif') 50% 50% no-repeat rgb(249,249,249);
+    opacity: .8;
+}
+*/
+
+.buttonload {
+  /*background-color: #4CAF50; /* Green background */*/
+  border: none; /* Remove borders */
+  color: white; /* White text */
+  padding: 12px 24px; /* Some padding */
+  font-size: 16px; /* Set a font-size */
+}
+
+/* Add a right margin to each icon */
+.fa {
+  margin-left: -12px;
+  margin-right: 8px;
+}
+
+
+    </style>
+</head>
+<body>
+  {% if messages %}
+  {% for message in messages %}
+     <li>{{ message }}</li>
+     {% endfor %}
+  {% endif %}
+
+    <div class="main-content">
+        <h1>Welcome to dashboard</h1>
+        	<form method="POST" enctype="multipart/form-data" class="form-horizontal" style="text-align: center"> 
+	{% csrf_token %}
+	<div class="form-group" style="margin-top: 20px;">
+	    <label for="name" >File: </label>
+	    <input type="file" name="csvfile" id="csv_file" required="True" class="form-control">
+	    <!-- <label for="q" >Press T for Tpot or S for sklearn: </label> -->
+	   <!--  <label for="args">Choose Algo:</label>
+
+<select id="q" name="q">
+  <option value="T">Tpot</option>
+  <option value="S">sklearn</option>
+</select>
+	     -->
+	</div>
+	<br>
+	<div class="form-group">                    
+	        <button id="upload_file" class="btn btn-primary" > <span style="margin-right:5px;">
+	        </span>Upload </button> 
+	    </div><br>
+  	</form>
+  <div id="loading" style="display: none;">
+        <button class="buttonload">
+          <i class="fa fa-refresh fa-spin"></i>Loading
+        </button>
+      </div>
+
+    
+       <!--  {% if db.result_set %} -->
+       <div id="output">
+         <h3 >R2Score result: = {{db.result_set}}</h3>
+         </div>
+         <!-- {% else %}
+         <h3>tpot result: = {{db}}</h3>
+        {% endif %} -->
+
+    </div>
+   
+</body>
+
+
+<script type="text/javascript">
+  $(function(){ 
+    $("#upload_file").click(function(){
+        $('#loading').show();
+        $.ajax({
+         type:"POST",
+         url : "/upload/csv/",
+         // dataType:"html",
+         data :{ csrfmiddlewaretoken : '{{ csrf_token }}' },
+         success: function(data, status, xhr){
+          $('#output').html();
+          $('#loading').hide();
+            //do something with your data
+        }
+        // return false;
+    });
+ });
+});
+</script>
+
+
+<!-- <script type="text/javascript">
+  function NeedLoader(){
+    $('#loading').show();
+    $.ajax({
+      type:"POST",
+      url: "upload/csv/",
+      dataType: "html"
+      // dataType : "json"
+      // // async:true
+      // data :{ csrfmiddlewaretoken : '{{ csrf_token }}' },
+      success:function(){
+        $('#output').html();
+        $('#loading').hide();
+          }
+    });
+  }
+
+  $(document).ready(function(){
+    console.log("Fromm Herere")
+  $("#upload_file").click(function(event){
+    console.log("Fromm Herere1")
+  //   NeedLoader();
+  var d = $("#csv_file").val();
+
+  //     var csv_file = $(this).val();
+      console.log(d)
+      $("input:text").val(d);
+   });
+  });
+</script>  -->
+</html>
+
+
+
+
+
+

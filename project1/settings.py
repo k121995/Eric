@@ -38,9 +38,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'testapp',
+    
 
 ]
-
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -81,8 +81,8 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'Eric',
         'USER':'postgres',
-        'PASSWORD':'navsoftpsql',
-        'HOST':'192.168.0.65',
+        'PASSWORD':'postgres',
+        'HOST':'localhost',
         'PORT':'5432'
     }
 }
